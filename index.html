@@ -32,6 +32,10 @@
   }
 
   /* ===== 手机外框（桌面演示用） ===== */
+  #phone-wrap {
+    position: relative;
+    width: 100%; height: 100%;
+  }
   #phone {
     position: relative;
     width: 100%; height: 100%;
@@ -40,12 +44,95 @@
     overflow: clip;
   }
   @media (min-width: 520px) {
-    body { display: flex; align-items: center; justify-content: center; background: #ECEAE3; }
+    body {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      background: linear-gradient(145deg, #F2F0E8 0%, #E4E0D5 40%, #DDD8CC 100%);
+      min-height: 100vh;
+    }
+    #phone-wrap {
+      position: relative;
+      width: 390px; height: 844px;
+      flex-shrink: 0;
+      /* 自适应缩放：JS 按窗口算 --phone-scale，手机框始终完整显示，不被裁切 */
+      scale: var(--phone-scale, 1);
+      transform-origin: center center;
+      /* 负 margin 抵消缩放后空出的布局高度，让底部品牌文字跟着上移、不被挤出窗口 */
+      margin: calc((var(--phone-scale, 1) - 1) * 422px) 0;
+    }
     #phone {
       width: 390px; height: 844px;
       border-radius: 54px;
-      box-shadow: 0 0 0 12px #1F1E1D, 0 0 0 13px #3a3835, 0 40px 90px rgba(31,30,29,.35);
+      box-shadow:
+        inset 0 0 6px rgba(255,255,255,.25),
+        0 0 0 11px #1c1b1a,
+        0 0 0 12px #2d2c2a,
+        0 0 0 14px #1c1b1a,
+        0 30px 60px rgba(31,30,29,.3),
+        0 60px 120px rgba(31,30,29,.15);
     }
+    /* 动态岛 */
+    #phone::before {
+      content: '';
+      position: absolute;
+      top: 12px; left: 50%; transform: translateX(-50%);
+      width: 126px; height: 36px;
+      background: #1c1b1a;
+      border-radius: 20px;
+      z-index: 9999;
+    }
+    /* 右侧按键 */
+    #phone::after {
+      content: '';
+      position: absolute;
+      top: 180px; right: -16px;
+      width: 4px; height: 96px;
+      background: linear-gradient(180deg, #2d2c2a, #1c1b1a, #2d2c2a);
+      border-radius: 0 3px 3px 0;
+      box-shadow: 0 -72px 0 0 #2d2c2a, 0 -72px 0 0 #1c1b1a;
+    }
+    /* 左侧按键（静音 + 音量） */
+    .side-btns-left {
+      position: absolute;
+      top: 142px; left: -16px;
+      width: 4px; z-index: 10;
+    }
+    .side-btns-left::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 32px;
+      background: linear-gradient(180deg, #2d2c2a, #1c1b1a, #2d2c2a);
+      border-radius: 3px 0 0 3px;
+    }
+    .side-btns-left::after {
+      content: '';
+      position: absolute;
+      top: 52px; left: 0;
+      width: 4px; height: 64px;
+      background: linear-gradient(180deg, #2d2c2a, #1c1b1a, #2d2c2a);
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 80px 0 0 #1c1b1a;
+    }
+    /* 底部品牌 */
+    .desktop-brand {
+      display: flex;
+      margin-top: 28px;
+      flex-direction: column; align-items: center; gap: 4px;
+      font-family: var(--sans);
+    }
+    .desktop-brand .b-name {
+      font-size: 14px; font-weight: 600;
+      color: var(--ink-2); letter-spacing: .08em;
+    }
+    .desktop-brand .b-sub {
+      font-size: 11.5px; color: var(--ink-3);
+      letter-spacing: .03em;
+    }
+  }
+  @media (max-width: 519px) {
+    #phone-wrap { width: 100%; height: 100%; }
+    .side-btns-left, .desktop-brand { display: none; }
   }
 
   .screen { position: absolute; inset: 0; display: none; flex-direction: column; background: var(--bg); }
@@ -422,6 +509,8 @@
 </style>
 </head>
 <body>
+<div id="phone-wrap">
+<div class="side-btns-left"></div>
 <div id="phone">
 
   <!-- ============ 首页 ============ -->
@@ -566,6 +655,11 @@
   </div>
 
   <div id="toast"></div>
+</div>
+</div>
+<div class="desktop-brand">
+  <div class="b-name">轻扫</div>
+  <div class="b-sub">让相册呼吸</div>
 </div>
 
 <script>
@@ -867,6 +961,19 @@ function confirmEmptyTrash() {
   toast(`已释放 ${mb} MB 空间 ✓`);
   refreshHome();
 }
+
+/* ================= 桌面端：手机框自适应缩放，避免被窗口裁切 ================= */
+function fitPhone() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let s = 1;
+  if (vw >= 520) {
+    // 高度方向留 130px（上下边距 + 底部品牌文字），宽度方向留 80px
+    s = Math.min(1, (vh - 130) / 844, (vw - 80) / 390);
+  }
+  document.documentElement.style.setProperty('--phone-scale', s.toFixed(4));
+}
+window.addEventListener('resize', fitPhone);
+fitPhone();
 
 /* ================= 启动 ================= */
 refreshHome();
