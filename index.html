@@ -511,6 +511,49 @@
     box-shadow: 0 12px 36px rgba(31,30,29,.25);
   }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+
+  /* ===== 开场动画 ===== */
+  #splash {
+    position: absolute; inset: 0; z-index: 10000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  #splash .sp-title {
+    font-family: var(--serif);
+    font-size: 52px; font-weight: 600;
+    color: var(--clay);
+    font-style: italic;
+    opacity: 0;
+    transform: scale(0.88);
+    animation: sp-in .8s cubic-bezier(.16,1,.3,1) .15s forwards;
+  }
+  #splash .sp-sub {
+    margin-top: 12px;
+    font-size: 14px; color: var(--ink-3);
+    letter-spacing: .08em;
+    opacity: 0;
+    animation: sp-fade .6s ease .55s forwards;
+  }
+  @keyframes sp-in {
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes sp-fade {
+    to { opacity: 1; }
+  }
+  #splash.exit {
+    animation: sp-exit .65s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  @keyframes sp-exit {
+    to { opacity: 0; transform: translateY(-40px); pointer-events: none; }
+  }
+
+  /* 首页元素入场 */
+  .home-enter { opacity: 0; transform: translateY(28px); }
+  .home-enter.in {
+    opacity: 1; transform: translateY(0);
+    transition: opacity .55s cubic-bezier(.16,1,.3,1), transform .55s cubic-bezier(.16,1,.3,1);
+  }
 </style>
 </head>
 <body>
@@ -518,12 +561,18 @@
 <div class="side-btns-left"></div>
 <div id="phone">
 
+  <!-- ============ 开场 ============ -->
+  <div id="splash">
+    <div class="sp-title">轻扫</div>
+    <div class="sp-sub">让相册呼吸</div>
+  </div>
+
   <!-- ============ 首页 ============ -->
   <div class="screen active" id="home">
-    <h1 class="home-title"><em>轻扫</em><br>让相册呼吸</h1>
-    <p class="home-sub">像刷短视频一样浏览您的相册，右滑删除、左滑收藏 —— 轻松整理相册</p>
+    <h1 class="home-title home-enter"><em>轻扫</em><br>让相册呼吸</h1>
+    <p class="home-sub home-enter">像刷短视频一样浏览您的相册，右滑删除、左滑收藏 —— 轻松整理相册</p>
 
-    <div class="storage-card">
+    <div class="storage-card home-enter">
       <div class="storage-top">
         <div>
           <div class="storage-label">相册占用</div>
@@ -534,8 +583,8 @@
       <div class="storage-hint" id="home-count">正在统计…</div>
     </div>
 
-    <div class="section-title">智能分类</div>
-    <div class="cat-grid">
+    <div class="section-title home-enter">智能分类</div>
+    <div class="cat-grid home-enter">
       <div class="cat-card" onclick="startSwipe('all')">
         <div class="cat-badge">推荐</div>
         <div class="cat-thumbs" id="thumbs-all"></div>
@@ -559,7 +608,7 @@
       </div>
     </div>
 
-    <div class="trash-entry" onclick="showScreen('trash-screen'); renderTrash()">
+    <div class="trash-entry home-enter" onclick="showScreen('trash-screen'); renderTrash()">
       <div class="trash-icon">🗑️</div>
       <div class="t-info">
         <b>回收站</b>
@@ -568,7 +617,7 @@
       <div class="arrow">›</div>
     </div>
 
-    <button class="pill-btn primary" id="home-start" onclick="startSwipe('all')">开始清理</button>
+    <button class="pill-btn primary home-enter" id="home-start" onclick="startSwipe('all')">开始清理</button>
     <div class="home-bottom-pad"></div>
   </div>
 
@@ -1017,6 +1066,18 @@ window.addEventListener('keydown', e => {
 
 /* ================= 启动 ================= */
 refreshHome();
+
+/* 开场动画 */
+setTimeout(() => {
+  const splash = $('splash');
+  if (!splash) return;
+  splash.classList.add('exit');
+  splash.addEventListener('animationend', () => splash.remove());
+  const els = document.querySelectorAll('#home .home-enter');
+  els.forEach((el, i) => {
+    setTimeout(() => el.classList.add('in'), i * 100);
+  });
+}, 1400);
 </script>
 </body>
 </html>
