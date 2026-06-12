@@ -267,11 +267,11 @@
   .trash-entry .arrow { color: var(--ink-3); font-size: 18px; }
 
   #home .pill-btn.primary {
-    position: sticky; bottom: 0; z-index: 30;
+    position: sticky; bottom: max(env(safe-area-inset-bottom), 26px); z-index: 30;
     margin-top: 24px; width: 100%;
     box-shadow: 0 10px 28px rgba(31,30,29,.22), 0 0 0 8px var(--bg);
   }
-  .home-bottom-pad { height: max(env(safe-area-inset-bottom), 18px); flex-shrink: 0; }
+  .home-bottom-pad { height: max(calc(env(safe-area-inset-bottom) + 8px), 26px); flex-shrink: 0; }
 
   /* ===== 清理流（核心，沉浸深色） ===== */
   #swipe-screen { background: #0E0D0C; }
