@@ -302,7 +302,9 @@
     display: flex; align-items: center; justify-content: center;
     will-change: transform;
     background: #0E0D0C;
+    cursor: grab;
   }
+  .photo-card.dragging { cursor: grabbing; }
   .photo-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
   .photo-card.next-card { transform: translateY(100%); }
 
@@ -811,6 +813,7 @@ function onDown(e) {
   startX = e.clientX; startY = e.clientY; dx = 0; dy = 0;
   const card = currentCard();
   try { card.setPointerCapture(e.pointerId); } catch (err) {}
+  card.classList.add('dragging');
   card.style.transition = 'none';
   card.addEventListener('pointermove', onMove);
   card.addEventListener('pointerup', onUp);
@@ -984,6 +987,30 @@ function fitPhone() {
 }
 window.addEventListener('resize', fitPhone);
 fitPhone();
+
+/* ===== 触控板滑动 / 键盘 ===== */
+let wheelAcc = 0, wheelTimer = null;
+window.addEventListener('wheel', e => {
+  const screen = document.querySelector('.screen.active');
+  if (!screen || screen.id !== 'swipe-screen') return;
+  if ($('swipe-guide').style.display !== 'none') return;
+  e.preventDefault();
+  wheelAcc += e.deltaX;
+  clearTimeout(wheelTimer);
+  wheelTimer = setTimeout(() => {
+    if (Math.abs(wheelAcc) > 60) decide(wheelAcc > 0 ? 'delete' : 'keep');
+    wheelAcc = 0;
+  }, 80);
+}, { passive: false });
+
+window.addEventListener('keydown', e => {
+  const screen = document.querySelector('.screen.active');
+  if (!screen || screen.id !== 'swipe-screen') return;
+  if ($('swipe-guide').style.display !== 'none') return;
+  if (e.key === 'ArrowRight') decide('delete');
+  else if (e.key === 'ArrowLeft') decide('keep');
+  else if (e.key === 'ArrowUp') decide('skip');
+});
 
 /* ================= 启动 ================= */
 refreshHome();
